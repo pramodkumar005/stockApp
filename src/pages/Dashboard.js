@@ -79,6 +79,7 @@ componentWillMount() {
             })
           })
           console.log('user is salesman>>>>>>>>>>>>>>>>>>>>');
+          console.log('user is salesman>>>>>>>>>>>>>>>>>>>>');
         }
       }
     });
