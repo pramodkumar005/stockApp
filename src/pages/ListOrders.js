@@ -68,6 +68,27 @@ export default class ListOrders extends Component<{}> {
 
 
 componentWillMount() {
+
+AsyncStorage.getItem('@Role:key', (err, result) => {
+      console.log('Result>>>>>>>>>>>>>>>'+result);
+      if (result==null) {
+        console.log('Role of the loged in user is null>>>> '+result);
+      }else{
+        console.log('Role of the loged in user>>>> '+result);
+        //Actions.dashboard();
+        if (result.slice(1,-1)=='O') {
+          this.setState({
+            role:'O'
+          })
+        }else{
+          this.setState({
+            role:'S'
+          })
+        }
+      }
+    });
+
+
   NetInfo.isConnected.fetch().then(isConnected => {
       this.setState({
         connected: isConnected
@@ -357,10 +378,14 @@ render() {
               onChange={(searchText) => this.setSearchText(searchText)} placeholderTextColor='#D6D5D3'
             underlineColorAndroid='transparent' placeholder={'Enter Text to search'}/>
           </View>
+          {this.state.role=='O'?
           <TouchableOpacity style={{marginRight:'5%', backgroundColor:'#6D9E54', paddingLeft:10, paddingRight:10, paddingBottom:3, paddingTop:3, borderRadius:5, justifyContent:'center', alignItems:'center'}} onPress={()=>{this.fetchExport()}}>
             <Icon name="upload" size={px2dp(15)} color="white"/>
             <Text style={{color:'white', fontSize:9}}>Export</Text>
           </TouchableOpacity>
+          :
+          null
+          }
         </View>
         {this.renderCondition()}
          <PopupDialog

@@ -112,9 +112,13 @@ fetchFunction(){
            // console.log('login data >>>>>>>>>>>>>>>>>>>>'+JSON.stringify(responseJson));
            // console.log(responseJson.status);
            // console.log('>>>>>>'+JSON.stringify(responseJson.tablesDetails[0].companyid));
+
+          console.log('>>>>>>>>>>>>>>>>>>>>>>>......'+ JSON.stringify (responseJson.tablesDetails[0].role));
+
            if(responseJson.status=='success'){
               AsyncStorage.setItem('@MyLogin:key', 'true');
-              AsyncStorage.setItem('@MyCompanyId:key', JSON.stringify(responseJson.tablesDetails[0].companyid));   
+              AsyncStorage.setItem('@MyCompanyId:key', JSON.stringify(responseJson.tablesDetails[0].companyid));
+              AsyncStorage.setItem('@Role:key', JSON.stringify(responseJson.tablesDetails[0].role));   
               Actions.dashboard();
            }else{
             errorMsg= responseJson.message;
