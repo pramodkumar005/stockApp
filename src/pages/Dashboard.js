@@ -58,6 +58,31 @@ componentDidMount(){
 }
 
 componentWillMount() {
+
+  AsyncStorage.getItem('@Role:key', (err, result) => {
+      console.log('Result>>>>>>>>>>>>>>>'+ JSON.stringify (result));
+      if (result==null) {
+        console.log('Role of the loged in user is null>>>> '+result);
+      }else{
+        console.log('Role of the loged in user>>>> '+result);
+        //Actions.dashboard();
+        if (result.slice(1,-1)=='O') {
+          this.setState({
+            role:'O'
+          })
+        }else{
+          this.setState({
+            role:'S'
+          },()=>{
+            this.setState({
+              selectedTab: 'ORDERS'
+            })
+          })
+          console.log('user is salesman>>>>>>>>>>>>>>>>>>>>');
+        }
+      }
+    });
+
   console.log('Props lastPage>>>>>>>>>>>>>>>'+this.props.lastPage);
   if(this.props.lastPage=='productOrder_2'){
     console.log('i am in if>>>>>.....');
@@ -66,9 +91,15 @@ componentWillMount() {
     })
   }else{
     console.log('i am in else>>>>>.....');
-    this.setState({
-      selectedTab: 'OUTSTANDING'
-    })
+    if (this.state.role=='S') {
+      this.setState({
+        selectedTab: 'ORDERS'
+      })
+    } else {
+      this.setState({
+        selectedTab: 'OUTSTANDING'
+      })
+    }
   }
 
   AsyncStorage.getItem('@MyLogin:key', (err, result) => {
@@ -81,6 +112,8 @@ componentWillMount() {
         //Actions.dashboard();
       }
     });
+
+
    console.log('>>>>>>>>>componentWillMount>>>dashboard');
   BackHandler.addEventListener('hardwareBackPress', this.handleBackPress.bind(this));
 }
@@ -133,41 +166,66 @@ render() {
             <Text style={{fontSize:15, marginLeft:'5%', color: "#FB9203"}}>LogOut</Text>
           </TouchableOpacity>
         </View>
-        <TabNavigator tabBarStyle={{ height: 50, overflow: 'hidden', alignItems:'center', justifyContent:'center'}} >
-          <TabNavigator.Item
-            selected={this.state.selectedTab === 'OUTSTANDING'}
-            title="OUTSTANDING"
-            onPress={() => this.setState({ selectedTab: 'OUTSTANDING' })}
-            selectedTitleStyle={{color: "#FB9203", fontSize:12}}
-            titleStyle={{fontSize:12}}
-            >
-            <ListOutstanding />
-          </TabNavigator.Item>
-          <TabNavigator.Item
-            selected={this.state.selectedTab === 'PRODUCTS'}
-            title="PRODUCTS"
-            onPress={() => this.setState({ selectedTab: 'PRODUCTS' })}
-            selectedTitleStyle={{color: "#FB9203", fontSize:12}}
-            titleStyle={{fontSize:12}}>
-            <ListProducts />
-          </TabNavigator.Item>
-           <TabNavigator.Item
-            selected={this.state.selectedTab === 'ORDERS'}
-            title="ORDERS"
-            onPress={() => this.setState({ selectedTab: 'ORDERS' })}
-            selectedTitleStyle={{color: "#FB9203", fontSize:12}}
-            titleStyle={{fontSize:12}}>
-            <ListOrders />
-          </TabNavigator.Item>
-            <TabNavigator.Item
-            selected={this.state.selectedTab === 'SALESORDER'}
-            title="SALES ORDER"
-            onPress={() => this.setState({ selectedTab: 'SALESORDER' })}
-            selectedTitleStyle={{color: "#FB9203", fontSize:12}}
-            titleStyle={{fontSize:12}}>
-            <SalesOrder_2 />
-          </TabNavigator.Item>
-        </TabNavigator>
+
+
+        {(this.state.role=='O')?
+          <TabNavigator tabBarStyle={{ height: 50, overflow: 'hidden', alignItems:'center', justifyContent:'center'}} >
+                  <TabNavigator.Item
+                    selected={this.state.selectedTab === 'OUTSTANDING'}
+                    title="OUTSTANDING"
+                    onPress={() => this.setState({ selectedTab: 'OUTSTANDING' })}
+                    selectedTitleStyle={{color: "#FB9203", fontSize:12}}
+                    titleStyle={{fontSize:12}}
+                    >
+                    <ListOutstanding />
+                  </TabNavigator.Item>
+                  <TabNavigator.Item
+                    selected={this.state.selectedTab === 'PRODUCTS'}
+                    title="PRODUCTS"
+                    onPress={() => this.setState({ selectedTab: 'PRODUCTS' })}
+                    selectedTitleStyle={{color: "#FB9203", fontSize:12}}
+                    titleStyle={{fontSize:12}}>
+                    <ListProducts />
+                  </TabNavigator.Item>
+                   <TabNavigator.Item
+                    selected={this.state.selectedTab === 'ORDERS'}
+                    title="ORDERS"
+                    onPress={() => this.setState({ selectedTab: 'ORDERS' })}
+                    selectedTitleStyle={{color: "#FB9203", fontSize:12}}
+                    titleStyle={{fontSize:12}}>
+                    <ListOrders />
+                  </TabNavigator.Item>
+                    <TabNavigator.Item
+                    selected={this.state.selectedTab === 'SALESORDER'}
+                    title="SALES ORDER"
+                    onPress={() => this.setState({ selectedTab: 'SALESORDER' })}
+                    selectedTitleStyle={{color: "#FB9203", fontSize:12}}
+                    titleStyle={{fontSize:12}}>
+                    <SalesOrder_2 />
+                  </TabNavigator.Item>
+          </TabNavigator>
+          :
+          <TabNavigator tabBarStyle={{ height: 50, overflow: 'hidden', alignItems:'center', justifyContent:'center'}} >
+                   <TabNavigator.Item
+                    selected={this.state.selectedTab === 'ORDERS'}
+                    title="ORDERS"
+                    onPress={() => this.setState({ selectedTab: 'ORDERS' })}
+                    selectedTitleStyle={{color: "#FB9203", fontSize:12}}
+                    titleStyle={{fontSize:12}}>
+                    <ListOrders />
+                  </TabNavigator.Item>
+                    <TabNavigator.Item
+                    selected={this.state.selectedTab === 'SALESORDER'}
+                    title="SALES ORDER"
+                    onPress={() => this.setState({ selectedTab: 'SALESORDER' })}
+                    selectedTitleStyle={{color: "#FB9203", fontSize:12}}
+                    titleStyle={{fontSize:12}}>
+                    <SalesOrder_2 />
+                  </TabNavigator.Item>
+          </TabNavigator>
+        }
+
+
          <PopupDialog
             dialogTitle={<DialogTitle title="Confirm" />}
            dialogAnimation={slideAnimation}
