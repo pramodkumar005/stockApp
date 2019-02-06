@@ -74,9 +74,16 @@ componentWillMount() {
           this.setState({
             role:'S'
           },()=>{
-            this.setState({
-              selectedTab: 'ORDERS'
-            })
+            if (this.props.lastPage=='productOrder_2') {
+                this.setState({
+                selectedTab: 'SALESORDER'
+              })
+            }else{
+                this.setState({
+                selectedTab: 'ORDERS'
+              })
+            }
+            
           })
           console.log('user is salesman>>>>>>>>>>>>>>>>>>>>');
           console.log('user is salesman>>>>>>>>>>>>>>>>>>>>');

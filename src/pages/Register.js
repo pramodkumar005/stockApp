@@ -23,6 +23,7 @@ import {Actions} from 'react-native-router-flux';
 import { Hoshi, Sae } from 'react-native-textinput-effects';
 import Routes from '../Routes';
 import { showMessage, hideMessage } from "react-native-flash-message";
+import {RadioGroup, RadioButton} from 'react-native-flexi-radio-button'
 
 var errorMsg = '';
 
@@ -34,7 +35,8 @@ export default class Register extends Component<{}> {
         this.state = { 
           username:'',
            password:'',
-           companyid:''
+           companyid:'',
+           role: 'S'
         }
     }
 
@@ -72,10 +74,11 @@ handleBackPress = () => {
   }
 
 fetchFunction(){
+
+  //Note email is now replaced with mobile number
   var email = this.state.email;
 
-if( /(.+)@(.+){2,}\.(.+){2,}/.test(email) ){
-
+  if( this.state.email.length >=10){
 
   if(this.state.connected==true){
     if(this.state.email==''| this.state.password=='' | this.state.companyid==''){
@@ -98,6 +101,7 @@ if( /(.+)@(.+){2,}\.(.+){2,}/.test(email) ){
             email:this.state.email,
             password: this.state.password,
             companyid: this.state.companyid,
+            role: this.state.role
             }}),
     })
     .then((response) => response.json())
@@ -105,6 +109,9 @@ if( /(.+)@(.+){2,}\.(.+){2,}/.test(email) ){
            console.log('login data >>>>>>>>>>>>>>>>>>>>'+JSON.stringify(responseJson));
            console.log(responseJson.status);
            console.log('>>>>>>'+JSON.stringify(responseJson.companyid));
+
+           AsyncStorage.setItem('@Role:key', JSON.stringify(this.state.role));
+           
            if(responseJson.status=='success'){
               AsyncStorage.setItem('@MyLogin:key', 'true');
               AsyncStorage.setItem('@MyCompanyId:key', JSON.stringify(responseJson.companyid));   
@@ -125,7 +132,7 @@ if( /(.+)@(.+){2,}\.(.+){2,}/.test(email) ){
     this.showAlert();
   }
     } else {
-   errorMsg= "Email not vaild";
+   errorMsg= "Phone Number not vaild";
     this.showAlert();
   }
 }
@@ -141,13 +148,34 @@ backlogin(){
   Actions.login();
 }
 
+onSelect(index, value){
+  this.setState({
+    text: `Selected index: ${index} , value: ${value}`,
+    role: value
+  }, ()=>{console.log('role>>>>>>>>>>>>'+this.state.role)})
+}
+
 render() {
     return (
       <View style={styles.container}>
         <Image source={require('../../assets/doddle.jpg')}  style={styles.backgroundImage}/>
         <View style={styles.loginSection}>
+
+          <RadioGroup 
+            onSelect = {(index, value) => this.onSelect(index, value)} 
+            color='#FB9203'
+            style={{flexDirection:'row'}}
+            selectedIndex={0} >
+            <RadioButton value={'S'} >
+              <Text>Salesman</Text>
+            </RadioButton>
+     
+            <RadioButton value={'O'}>
+              <Text>Owner</Text>
+            </RadioButton>
+          </RadioGroup>
           
-            <Hoshi label={'Email'} borderColor={'#FB9203'} maskColor={'#ffffff'} labelStyle={{color:'#FB9203'}} onChangeText={(text) => { this.setState({email: text}) }}/>
+            <Hoshi label={'Phone Number'} borderColor={'#FB9203'} maskColor={'#ffffff'} labelStyle={{color:'#FB9203'}} onChangeText={(text) => { this.setState({email: text}) }} keyboardType="numeric"/>
             <Hoshi label={'Password'} borderColor={'#FB9203'} maskColor={'#ffffff'}  style={{marginTop:'4%'}} labelStyle={{color:'#FB9203'}} onChangeText={(text) => { this.setState({password: text}) }}/>
              <Hoshi label={'Company ID'} borderColor={'#FB9203'} maskColor={'#ffffff'}  style={{marginTop:'4%'}} labelStyle={{color:'#FB9203'}} onChangeText={(text) => { this.setState({companyid: text}) }}/>
             <View style={{width:'100%', alignItems:'center'}}>
@@ -179,11 +207,11 @@ const styles = StyleSheet.create({
     position:'relative'
   },
   loginSection: {
-    paddingTop:'10%',
+    paddingTop:'0%',
     width:'70%', 
-    height:'70%', 
+    height:'80%', 
     position:'absolute', 
-    top: '15%', 
+    top: '10%', 
     bottom: 0, 
     left: '15%', 
     right: 0,

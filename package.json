@@ -1,6 +1,6 @@
 {
   "name": "VTAG",
-  "version": "5.1.0",
+  "version": "7.1.0",
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
@@ -13,6 +13,7 @@
     "react-native-action-button": "^2.8.5",
     "react-native-android-back-button": "^0.3.0",
     "react-native-flash-message": "^0.1.10",
+    "react-native-flexi-radio-button": "^0.2.2",
     "react-native-foldview": "^1.1.1",
     "react-native-html-to-pdf": "^0.6.0",
     "react-native-material-dropdown": "^0.11.1",

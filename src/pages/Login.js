@@ -113,7 +113,7 @@ fetchFunction(){
            // console.log(responseJson.status);
            // console.log('>>>>>>'+JSON.stringify(responseJson.tablesDetails[0].companyid));
 
-          console.log('>>>>>>>>>>>>>>>>>>>>>>>......'+ JSON.stringify (responseJson.tablesDetails[0].role));
+          console.log('>>>>>>>>>>>>>>>>>>>>>>>......'+ JSON.stringify (responseJson));
 
            if(responseJson.status=='success'){
               AsyncStorage.setItem('@MyLogin:key', 'true');

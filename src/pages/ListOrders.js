@@ -378,14 +378,12 @@ render() {
               onChange={(searchText) => this.setSearchText(searchText)} placeholderTextColor='#D6D5D3'
             underlineColorAndroid='transparent' placeholder={'Enter Text to search'}/>
           </View>
-          {this.state.role=='O'?
+          
           <TouchableOpacity style={{marginRight:'5%', backgroundColor:'#6D9E54', paddingLeft:10, paddingRight:10, paddingBottom:3, paddingTop:3, borderRadius:5, justifyContent:'center', alignItems:'center'}} onPress={()=>{this.fetchExport()}}>
             <Icon name="upload" size={px2dp(15)} color="white"/>
             <Text style={{color:'white', fontSize:9}}>Export</Text>
           </TouchableOpacity>
-          :
-          null
-          }
+          
         </View>
         {this.renderCondition()}
          <PopupDialog
