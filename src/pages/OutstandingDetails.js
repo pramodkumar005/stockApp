@@ -88,7 +88,8 @@ export default class OutstandingDetails extends Component<{}> {
           totalFilteredDebit:0,
           closingBalance:0,
           sharePdf:false,
-          loader:false
+          loader:false,
+          name: props.item.name
         }
     this.fetchFunction = this.fetchFunction.bind(this);
     this.selectStart = this.selectStart.bind(this);
@@ -96,6 +97,7 @@ export default class OutstandingDetails extends Component<{}> {
     this.filterData = this.filterData.bind(this);
     this.resetFilter = this.resetFilter.bind(this);
     this.generatePDF = this.generatePDF.bind(this);
+    console.log('Props>>>>>>>>>>>>>>>>>>>>>>'+ JSON.stringify( props.item));
     }
 
 
@@ -235,7 +237,7 @@ generatePDF(){
         title: "Ledger Details",
         // message: "I just wanted to show you this:",
         url: "data:application/pdf;base64," + fileData.base64,
-        subject: "Quotation",
+        subject: "Ledger Details",
       });
     });
   }
@@ -614,7 +616,7 @@ filterData(){
             closingBalance: newClosingBalance
           },()=>{
                        //creating html data for the PDF
-          var pdfOutstanding = '<div style="background: #78B05C;padding: 10;width: 100px;border-radius: 10px;margin-bottom: 10px;"> <label>Outstanding</label></br> <span>Rs: '+this.state.openingBalance +'</span></div>';
+          var pdfOutstanding = '<div><div style="background: #78B05C;padding: 10;width: 100px;border-radius: 10px;margin-bottom: 10px; display: inline-block"> <label>Outstanding</label></br>  <span>Rs: '+this.state.openingBalance +'</span></div><div style="display: inline-block"><LABEL style="color: #FB9203; padding-left:15;font-weight: bold" >Name: '+ this.state.name+'</LABEL></div></div>';
 
           var pdfClosingBalance = '<div style="background: #FB9203;padding: 10;width: 100px;border-radius: 10px;margin-top: 20px;margin-left:400px"> <label>Outstanding</label></br> <span>Rs: '+this.state.closingBalance +'</span></div>';
 
@@ -634,7 +636,7 @@ filterData(){
             var credit = filteredData[i].vcr;
             tempArray.push(credit);
 
-            pdfTable= pdfTable+ '<tr><td style="width:100px">'+date+'</td><td style="width:100px">'+trans+'</td><td style="width:100px">'+billNo+'</td><td style="width:100px">'+debit+'</td><td style="width:100px">'+credit+'</td></tr>'
+            pdfTable= pdfTable+ '<tr><td style="width:100px;text-align: right">'+date+'</td><td style="width:100px;text-align: right">'+trans+'</td><td style="width:100px;text-align: right">'+billNo+'</td><td style="width:100px;text-align: right">'+debit+'</td><td style="width:100px;text-align: right">'+credit+'</td></tr>'
           }
 
           pdfTable= pdfTable+ '</table>';
@@ -862,5 +864,5 @@ const styles = StyleSheet.create({
 
   },
   head: { height: 40, backgroundColor: '#f4b258' },
-  text: { margin: 6, fontSize:12 }
+  text: { margin: 6, fontSize:12, textAlign: 'right' }
 });

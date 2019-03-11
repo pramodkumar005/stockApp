@@ -25,6 +25,8 @@ import {
   BackHandler
 } from 'react-native';
 import {Actions} from 'react-native-router-flux';
+
+import RNHTMLtoPDF   from 'react-native-html-to-pdf';
 import { Hoshi, Sae } from 'react-native-textinput-effects';
 import { filter, indexOf, invert, findKey } from 'lodash';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -34,6 +36,8 @@ import PopupDialog, { DialogTitle, SlideAnimation } from 'react-native-popup-dia
 import { Picker, DatePicker } from 'react-native-wheel-datepicker';
 import ActionButton from 'react-native-action-button';
 import { showMessage, hideMessage } from "react-native-flash-message";
+import { Table, Row, Rows } from 'react-native-table-component';
+import Share, {ShareSheet, Button} from 'react-native-share';
 
 const deviceW = Dimensions.get('window').width
 const basePx = 375
@@ -46,7 +50,9 @@ var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 var partyArray=[];
 var productArray=[];
 var errorMsg='';
-
+var pdfshowData= [];
+var todayDate='';
+var pdfContent='';
 
 export default class ProductOrder_2 extends Component<{}> {
   constructor(props)
@@ -65,7 +71,14 @@ export default class ProductOrder_2 extends Component<{}> {
            customercode: props.customerDetails.customercode,
            customerName: props.customerDetails.name,
            orderArray: [],
-           tempDatasource: ds.cloneWithRows([])
+           tempDatasource: ds.cloneWithRows([]),
+           tableHead: ['Description', 'Qty', 'Rate', 'Amount'],
+           tableData: [
+            ['1', '2', '3', '4'],
+            ['a', 'b', 'c', 'd'],
+            ['1', '2', '3', '456\n789'],
+            ['a', 'b', 'c', 'd']
+          ]
         }
     this.fetchFunction = this.fetchFunction.bind(this);
     this.setSearchText = this.setSearchText.bind(this);
@@ -77,8 +90,12 @@ export default class ProductOrder_2 extends Component<{}> {
     this.deleteRow = this.deleteRow.bind(this);
 
     console.log('Customer Details:>>>'+ props.customerDetails.customercode);
-    console.log('Customer Details:>>>'+ props.customerDetails.name);    
-    }
+    console.log('Customer Details:>>>'+ props.customerDetails.name);   
+
+    var date = new Date();
+    todayDate =  date.getDate() +'-'+date.getMonth()+'-'+date.getFullYear(); 
+
+  }
 
 
 handleBackPress = () => {
@@ -158,40 +175,40 @@ _handleConnectionChange = (isConnected) => {
 
 fetchFunction(){
 console.log('Fetching>>>>>>>>>>>>>>>>>>>>'+global.productUrl+this.state.companyId);
-let compID =  this.state.companyId.slice(1,-1);
-console.log('Connection status::' + compID);
-NetInfo.isConnected.fetch().then(isConnected =>{
+  let compID =  this.state.companyId.slice(1,-1);
+  console.log('Connection status::' + compID);
+  NetInfo.isConnected.fetch().then(isConnected =>{
 
-    console.log('Connection status::'+isConnected +"::" + compID);
-    if(isConnected==true) {  
-    this.setState({connected:true}); 
-     fetch(global.productUrl+this.state.companyId.slice(1,-1), {
-    method: 'GET',
-    headers: {
-     'Content-Type': 'application/json',
-    }
-  })
-  .then((response) => response.json())
-      .then((responseJson) => {
-         //console.log('customers>>>>>>>>'+ JSON.stringify(responseJson.tablesDetails));
-         this.setState({
-          dataSource: ds.cloneWithRows(responseJson.tablesDetails),
-          data: responseJson.tablesDetails,
-          dataLoaded: true,
-          refreshing: false
-         });
-         //console.log(this.state.dataSource);
-      })
-     .catch((error) => {
-        console.error(error);
+      console.log('Connection status::'+isConnected +"::" + compID);
+      if(isConnected==true) {  
+      this.setState({connected:true}); 
+       fetch(global.productUrl+this.state.companyId.slice(1,-1), {
+      method: 'GET',
+      headers: {
+       'Content-Type': 'application/json',
+      }
+    })
+    .then((response) => response.json())
+        .then((responseJson) => {
+           //console.log('customers>>>>>>>>'+ JSON.stringify(responseJson.tablesDetails));
+           this.setState({
+            dataSource: ds.cloneWithRows(responseJson.tablesDetails),
+            data: responseJson.tablesDetails,
+            dataLoaded: true,
+            refreshing: false
+           });
+           //console.log(this.state.dataSource);
+        })
+       .catch((error) => {
+          console.error(error);
+        });
+     } else {
+      console.log('No network');
+      this.setState({
+        connected:false
       });
-   } else {
-    console.log('No network');
-    this.setState({
-      connected:false
-    });
-   }
-});
+     }
+  });
 }
 
 addEntry(){
@@ -209,13 +226,8 @@ addEntry(){
     this.setState({
       totalAmount: amount
     }, () => {
-
-
     this.popupDialog.dismiss();
     var entry ={cid:this.state.customercode, cust_name: this.state.customerName, pid:this.state.productId, prod_name:this.state.productName, rate:this.state.rate, qty:this.state.quantity, amount:this.state.totalAmount, ord_no:'', ord_date: currentDate};
-
-    //console.log("cid:"+ this.state.customercode+ ", cust_name:" + this.state.customerName+ ", pid:"+this.state.productId+ ", prod_name:" +this.state.productName+ ", rate:"+ this.state.rate+ ", amount:"+this.state.amount+", id:0"+", ord_no:0"+", ord_date:"+this.state.ord_date);
-
 
     var tempArray = this.state.orderArray;
 
@@ -223,15 +235,12 @@ addEntry(){
 
      this.setState({
         orderArray: tempArray,
-        tempDatasource: ds.cloneWithRows(tempArray)
+        tempDatasource: ds.cloneWithRows(tempArray),
+        pdfArray:tempArray
      },()=>{console.log(this.state.orderArray)})
 
     tempArray = [];
 
-    // amount = this.state.qty * this.state.rate;
-    // this.setState({
-    //   amount: amount
-    // })
     console.log('amount>>>>>>'+this.state.amount);
     errorMsg= "Order added to cart";
     this.showAlert();
@@ -239,6 +248,8 @@ addEntry(){
   }
 
 }
+
+
 
 
 showAlert(){
@@ -305,6 +316,87 @@ quantitySelector(rowData){
 
 }
 
+
+generatePDF(){
+  pdfshowData = [];
+  var pdfTable =[];
+  var amountTotal ='';
+  console.log('tempData>>>>>>>>>>'+JSON.stringify(this.state.pdfArray.length));
+  for (var i = 0; i < this.state.pdfArray.length; i++) {
+     // console.log("prod name>>>>>>"+ JSON.stringify(this.state.pdfArray[i].cid));
+    pdfTable = pdfTable + '<tr style="text-align:right"><td style="padding-left: 5px">'+ this.state.pdfArray[i].prod_name+ '</td><td style="padding-left: 5px">'+ this.state.pdfArray[i].qty +'</td><td style="padding-left: 5px">'+ this.state.pdfArray[i].rate+ '</td><td style="padding-left: 5px">' + this.state.pdfArray[i].rate * this.state.pdfArray[i].qty+ '</td></tr>';
+    amountTotal = Number(amountTotal) + Number(this.state.pdfArray[i].amount);
+  }
+
+
+  for (var i = 0; i < this.state.pdfArray.length; i++) {
+     // console.log("prod name>>>>>>"+ JSON.stringify(this.state.pdfArray[i].cid));
+     tempPdfshowData =[];
+     var product = this.state.pdfArray[i].prod_name;
+     tempPdfshowData.push(product);
+     var qty =  this.state.pdfArray[i].qty;
+     tempPdfshowData.push(qty);
+     var rate = this.state.pdfArray[i].rate;
+     tempPdfshowData.push(rate);
+     var amount = this.state.pdfArray[i].rate * this.state.pdfArray[i].qty;
+     tempPdfshowData.push(amount.toFixed(2));
+     pdfshowData.push(tempPdfshowData);
+  }
+
+    var lastrow = ['item(s): '+this.state.pdfArray.length, ' ','Total:', amountTotal];
+    pdfshowData.push(lastrow);
+
+    console.log('Array >>>>>>>>>>>>>>>>>>>>>>>>.'+pdfshowData);
+
+    this.setState({
+      pdfRowData : pdfshowData
+    })
+
+  var pdfTop = '<div style="padding: 5;width: 100px;border-bottom: 1px solid;margin-bottom: 10px;"><span>ORDER SLIP</span></div>';
+
+  var pdfDate = '<div style="margin-bottom:10px"><span>Date:' + todayDate + '</span></div> <table style="border-bottom: 1px solid">';
+
+  var pdfTableHeader = '<tr style="text-align: right; background: #dedbdb"> <th style="padding-left: 10px">Description</th> <th style="padding-left: 10px">Qty</th> <th style="padding-left: 10px">Rate</th> <th style="padding-left: 10px">Amount</th>  </tr>';
+
+  var pdfFotter = '<tr  style="text-align:right"> <td style="border-top: 1px solid;">Item(s): '+this.state.pdfArray.length +'</td> <td style="border-top: 1px solid;"></td> <td style="border-top: 1px solid;">Total</td> <td style="border-top: 1px solid;font-size: 24px;font-weight: bold;">'+ amountTotal.toFixed(2) +'</td>  </tr></table>'
+
+  console.log("amountTotal name>>>>>>"+ pdfTop + pdfDate + pdfTableHeader+pdfTable +pdfFotter);
+
+  pdfContent = pdfTop + pdfDate + pdfTableHeader+pdfTable +pdfFotter;
+
+  this.popupDialog3.show();
+}
+
+
+print(){
+  let options = {
+      html: pdfContent,
+      fileName: 'Reciept',
+      directory: 'Documents',
+      height: 800,
+      width: 1056,
+      padding: 24,
+      base64: true
+    };
+
+  RNHTMLtoPDF.convert(options).then(fileData => {
+      console.log('>>>>>>>>>>>>>>>>>>>33333333333333333333');
+      console.log('PDF generated', fileData);
+      console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.');
+      console.log(fileData.base64); 
+      console.log(fileData.filePath);
+
+      Share.open({
+        title: "Order Slip",
+        // message: "I just wanted to show you this:",
+        url: "data:application/pdf;base64," + fileData.base64,
+        subject: "Order Slip",
+      });
+    });
+}
+
+
+
 postFunction(){
     console.log(this.state.orderArray);
     this.popupDialog.dismiss();
@@ -338,6 +430,7 @@ postFunction(){
                     this.popupDialog2.dismiss();
                     console.log('>>>>>>data send successfully');
                     this.showAlert();
+                    this.generatePDF();
                  }else{
                     this.popupDialog2.dismiss();
                     this.showAlert();
@@ -359,7 +452,7 @@ postFunction(){
     });
     this.showAlert();
   }
-
+  
 }
 
 deleteRow(rowID){
@@ -370,7 +463,8 @@ deleteRow(rowID){
   const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
   this.setState({
     orderArray:tempAarray,
-    tempDatasource: ds.cloneWithRows(tempAarray)
+    tempDatasource: ds.cloneWithRows(tempAarray),
+    pdfArray:tempAarray
   },()=>{console.log(this.state.tempDatasource)})
 }
 
@@ -434,7 +528,17 @@ render() {
           }
           renderRow={(rowData) => 
              <View>
-                <TouchableOpacity style={{width:'100%', paddingLeft:'5%', paddingRight:'5%', justifyContent:'space-between', flexDirection:'row'}} onPress={()=>{ if (rowData.cur_stk =='0.00') {null}else{this.quantitySelector(rowData)}}}>
+                <TouchableOpacity style={{width:'100%', paddingLeft:'5%', paddingRight:'5%', justifyContent:'space-between', flexDirection:'row'}} onPress={()=>{ 
+                    if (rowData.cur_stk <= Number('0.00')) {
+                      errorMsg= "Stock not available";
+                      this.showAlert();
+                    }
+                    else {
+                      console.log('In Else statement>>>>>.');
+                      this.quantitySelector(rowData)
+                      }
+                    }
+                  }>
                     <View>
                     <Text style={{fontSize:15, color: '#FB9203'}}>{rowData.pat}</Text>
                       <View style={{flexDirection:'row'}}>
@@ -442,7 +546,7 @@ render() {
                         <Text style={{}}>{rowData.mrp}</Text> 
                         <Text style={{marginLeft:10,color:'green'}}>Stock: </Text>
                         {Number(rowData.cur_stk) <= Number('0.00') ?
-                        <Text style={{color:'grey'}}>Not Avialable</Text>
+                        <Text style={{color:'grey'}}>Not Available</Text>
                         :
                         <Text style={{color:'green'}}>{rowData.cur_stk}</Text>
                         }
@@ -504,7 +608,6 @@ render() {
                                   <Text style={{}}>{rowData.amount}</Text>
                               </View>
                           </View>
-
                           <TouchableOpacity style={{justifyContent:'center'}} onPress={()=>{this.deleteRow(rowID)}}>
                             <Icon name="minus-square" size={px2dp(20)} color="#FB9203"/>
                           </TouchableOpacity> 
@@ -543,6 +646,27 @@ render() {
                         </TouchableOpacity>
                     </View>
                   }
+              </View>
+          </PopupDialog>
+          <PopupDialog
+                  width={0.9}
+                  dialogStyle={{marginTop:0}}
+                  height={550}
+                  dialogTitle={<DialogTitle title="Print Reciept" />}
+                  ref={(popupDialog3) => { this.popupDialog3 = popupDialog3; }}
+                >
+              <View style={{flex:1, alignItems: 'center', paddingBottom:35}}>
+                <ScrollView style={{width:'90%', height:'100%', flexGrow:1}}>
+
+                  <Text style={{paddingTop:10, paddingBottom:10}}>Date: {todayDate}</Text>
+                   <Table borderStyle={{borderWidth: 1, borderColor: '#f4b258'}}>
+                    <Row data={this.state.tableHead} style={styles.head} textStyle={styles.text}/>
+                    <Rows data={this.state.pdfRowData} textStyle={styles.text}/>
+                  </Table>
+                  <TouchableOpacity style={styles.printButton} onPress={()=>{this.print()}}> 
+                    <Text style={{color:'white'}}>Print</Text>
+                  </TouchableOpacity>
+                </ScrollView>
               </View>
           </PopupDialog>
           <ActionButton buttonColor="rgba(231,76,60,1)" renderIcon={active => active ? (<Icon name="plus" style={styles.actionButtonIcon} /> ) : (<Icon name="shopping-cart" style={styles.actionButtonIcon} />)}>
@@ -602,5 +726,16 @@ const styles = StyleSheet.create({
    marginTop:'1%', 
    marginBottom:'1%',
    borderRadius:5
- }
+ },
+ printButton:{
+   alignItems:'center',
+   justifyContent:'center', 
+   width:100, 
+   backgroundColor:'#FB9203', 
+   height:35, 
+   marginTop:20,
+   borderRadius:5
+ },
+ head: { height: 40, backgroundColor: '#dedbdb' },
+ text: { margin: 6, fontSize:12, textAlign: 'right' }
 });

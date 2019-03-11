@@ -109,7 +109,7 @@ fetchFunction(){
     })
     .then((response) => response.json())
         .then((responseJson) => {
-           // console.log('login data >>>>>>>>>>>>>>>>>>>>'+JSON.stringify(responseJson));
+           console.log('login data >>>>>>>>>>>>>>>>>>>>'+JSON.stringify(responseJson));
            // console.log(responseJson.status);
            // console.log('>>>>>>'+JSON.stringify(responseJson.tablesDetails[0].companyid));
 
@@ -126,7 +126,7 @@ fetchFunction(){
            }
         })
        .catch((error) => {
-          console.error(error);
+          console.error('error>>>>>.'+error);
         });
     }
 
@@ -155,7 +155,7 @@ render() {
         <View style={styles.loginSection}>
             <Image source={require('../../assets/main.png')} style={{height:50, width:200}} resizeMode={'contain'}/>
             <Hoshi label={'Username'} borderColor={'#FB9203'} maskColor={'#ffffff'} labelStyle={{color:'#FB9203'}} onChangeText={(text) => { this.setState({username: text}) }}/>
-            <Hoshi label={'Password'} borderColor={'#FB9203'} maskColor={'#ffffff'}  style={{marginTop:'4%'}} labelStyle={{color:'#FB9203'}} onChangeText={(text) => { this.setState({password: text}) }}/>
+            <Hoshi label={'Password'} borderColor={'#FB9203'} maskColor={'#ffffff'}  style={{marginTop:'4%'}} labelStyle={{color:'#FB9203'}} onChangeText={(text) => { this.setState({password: text}) }} secureTextEntry={true}/>
             <View style={{width:'100%', alignItems:'center'}}>
             <TouchableOpacity style={styles.button} onPress={()=>{this.fetchFunction()}}>
               <Text style={{color:'white'}}>Login</Text>

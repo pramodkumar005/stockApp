@@ -176,7 +176,7 @@ render() {
           </RadioGroup>
           
             <Hoshi label={'Phone Number'} borderColor={'#FB9203'} maskColor={'#ffffff'} labelStyle={{color:'#FB9203'}} onChangeText={(text) => { this.setState({email: text}) }} keyboardType="numeric"/>
-            <Hoshi label={'Password'} borderColor={'#FB9203'} maskColor={'#ffffff'}  style={{marginTop:'4%'}} labelStyle={{color:'#FB9203'}} onChangeText={(text) => { this.setState({password: text}) }}/>
+            <Hoshi label={'Password'} borderColor={'#FB9203'} maskColor={'#ffffff'}  style={{marginTop:'4%'}} labelStyle={{color:'#FB9203'}} onChangeText={(text) => { this.setState({password: text}) }} secureTextEntry={true}/>
              <Hoshi label={'Company ID'} borderColor={'#FB9203'} maskColor={'#ffffff'}  style={{marginTop:'4%'}} labelStyle={{color:'#FB9203'}} onChangeText={(text) => { this.setState({companyid: text}) }}/>
             <View style={{width:'100%', alignItems:'center'}}>
             <TouchableOpacity style={styles.button} onPress={()=>{this.fetchFunction()}}>
